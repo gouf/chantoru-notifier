@@ -1,86 +1,109 @@
 #encoding: UTF-8
-require 'nokogiri'
-require 'mechanize'
-require 'aws-sdk'
-require 'json'
-require 'kconv'
-require 'eventmachine'
-require 'logger'
+require 'bundler'
+Bundler.require
 
-ID   = ENV['CHANTORU_ID']
-PASS = ENV['CHANTORU_PASS']
-
-@a = Mechanize.new {|agent|
-  agent.user_agent_alias = 'Mac Safari'
-}
-@l = Logger.new('log', 'daily')
-@l.info('Program started')
-
-def latest_list page
-  # Get latest recorded list. format.
-  new_title_list = JSON.restore(page.content.to_s)['list'].collect do |d|
-    "#{d['title']}"
+class ChantoruNotifier
+  def initialize
+    @id   = ENV['CHANTORU_ID']
+    @pass = ENV['CHANTORU_PASS']
+    @a = Mechanize.new {|agent| agent.user_agent_alias = 'Mac Safari'}
+    @l = Logger.new('log', 'daily')
+    @to_email_address   = @id
+    @from_email_address = 'noreply@inn0centzero.com'
   end
-  old_title_list = JSON.restore(File.open('recorded_list.json', 'r').read)
-  File.open('recorded_list.json', 'w') do |f|
-    f.write new_title_list.to_json
+
+  public
+  def check_new_titles
+    login
+    titles = get_latest_records(@a.get(recorded_list_url))
+    unless titles.size == 0 then
+      # Notify to user
+      report_new_titles(titles)
+    end
   end
-  res = new_title_list - old_title_list
-end
 
-def login id, pass
-  # Login ID/PASS
-  uri = 'https://account.sonyentertainmentnetwork.com/external/auth/login.action?returnURL=https://tv.so-net.ne.jp/chan-toru/sen'
-  @a.get(uri) do |page|
-    res = page.form_with(id: 'signInForm') do |f|
-      f.field_with(name: 'j_username').value = id
-      f.field_with(name: 'j_password').value = pass
-    end.submit
+  private
+  def login_url
+    'https://account.sonyentertainmentnetwork.com/external/auth/login.action?returnURL=https://tv.so-net.ne.jp/chan-toru/sen'
   end
-end
+  def recorded_list_url
+    'https://tv.so-net.ne.jp/chan-toru/list?index=0&num=10&command=title'
+  end
+  def login
+    @a.get(login_url) do |page|
+      page.form_with(id: 'signInForm') do |f|
+        f.field_with(name: 'j_username').value = @id
+        f.field_with(name: 'j_password').value = @pass
+      end.submit
+    end
+  end
+  def get_latest_records page
+    # Get latest titles.
+    new_titles = load_new_titles(page)
+    old_titles = load_old_titles
+    save_to_file(new_titles)
+    extract_new_titles(new_titles, old_titles)
+  end
+  def load_new_titles page
+    JSON.restore(page.content.to_s)['list'].collect do |d|
+      "#{d['title']}"
+    end
+  end
+  def save_to_file titles
+    File.open('recorded_list.json', 'w') do |f|
+      f.write titles.to_json
+    end
+  end
+  def load_old_titles
+    JSON.restore(File.open('recorded_list.json', 'r').read)
+  end
+  def extract_new_titles n, o
+    # Compare 2 arrays.
+    # it will only get new titles
+    n.to_a - o.to_a
+  end
+  def report_new_titles body
+    # Setup AWS SES
+    ses = AWS::SimpleEmailService.new(
+      access_key_id:     ENV['AWS_ACCESS_KEY_ID'],
+      secret_access_key: ENV['AWS_SECRET_ACCESS_KEY']
+    )
 
-def send_email opt
-  ses = AWS::SimpleEmailService.new(
-    access_key_id: ENV['AWS_ACCESS_KEY_ID'],
-    secret_access_key: ENV['AWS_SECRET_ACCESS_KEY']
-  )
+    # format title texts
+    body_text = formated_body(body, :text)
+    body_html = formated_body(body, :html)
 
-  # format
-  body_text = opt[:body_text].inject(""){|body, x| body += "・#{x}\n"}
-  body_html = opt[:body_html].inject(""){|body, x| body += "・#{x}<br />"}
-
-  # send
-  ses.send_email(
-    subject: '新着タイトルのお知らせ',
-    to: opt[:to_email],
-    from: opt[:from_email],
-    body_text: body_text,
-    body_html: body_html,
-    body_text_charset: 'UTF-8'
-  )
-  return 'The message has been send.'
-end
-
-# Get recorded list
-def get_recorded_list
-  uri = 'https://tv.so-net.ne.jp/chan-toru/list?index=0&num=10&command=title'
-  return 'Faild to log in.' if (login(ID, PASS)).nil?
-  return 'Faild to get recerded list.' if (page = @a.get(uri)).nil?
-  res = latest_list(page)
-  unless res.size == 0 then
-    # set up mail send
-    to_email = ENV['CHANTORU_ID']
-    from_email = 'noreply@example.com'
-
-    send_email({body_text: res, body_html: res, to_email: to_email, from_email: from_email})
-  else
-    return 'No new recorded list yet.'
+    # send
+    ses.send_email(
+      subject: '新着タイトルのお知らせ',
+      to: @to_email_address,
+      from: @from_email_address,
+      body_text: body_text,
+      body_html: body_html,
+      body_text_charset: 'UTF-8'
+    )
+  end
+  def formated_body body, type
+    case type
+      when :text
+        body.inject("") {|formated_body, title|
+          formated_body += "・#{title}\n"
+        }
+      when :html
+        body.inject(""){|formated_body, title|
+          formated_body += "・#{title}<br />"
+        }
+    end
   end
 end
 
 # Run
-@l.info(get_recorded_list)
+chantoru = ChantoruNotifier.new
+chantoru.check_new_titles
 EM.run do
   # 1 hour cycle. (60sec. * 60)
-  EM.add_periodic_timer(60 * 60){@l.info(get_recorded_list)}
+  EM.add_periodic_timer(60 * 60){
+    chantoru = ChantoruNotifier.new
+    chantoru.check_new_titles
+  }
 end
