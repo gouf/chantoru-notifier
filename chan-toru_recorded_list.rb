@@ -22,6 +22,9 @@ class ChantoruNotifier
       report_new_titles(titles)
     end
   end
+  def info text
+    @l.info(text)
+  end
 
   private
   def login_url
