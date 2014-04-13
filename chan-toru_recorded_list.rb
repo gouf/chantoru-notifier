@@ -51,6 +51,7 @@ class ChantoruNotifier
     extract_new_titles(new_titles, old_titles)
   end
   def load_new_titles page
+    return if JSON.restore(page.content.to_s)['list'].nil?
     JSON.restore(page.content.to_s)['list'].collect do |d|
       "#{d['title']}"
     end
