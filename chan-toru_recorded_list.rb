@@ -20,6 +20,8 @@ class ChantoruNotifier
     unless titles.size == 0 then
       # Notify to user
       report_new_titles(titles)
+    else
+      info('Got no new titles')
     end
   end
   def info text
@@ -86,6 +88,7 @@ class ChantoruNotifier
       body_html: body_html,
       body_text_charset: 'UTF-8'
     )
+    info('Message has sent.')
   end
   def formated_body body, type
     case type
@@ -108,6 +111,7 @@ end
 
 # Run
 chantoru = ChantoruNotifier.new
+chantoru.info('Program has started')
 chantoru.check_new_titles
 EM.run do
   # 1 hour cycle. (60sec. * 60)
