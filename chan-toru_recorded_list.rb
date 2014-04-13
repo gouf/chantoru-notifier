@@ -10,6 +10,7 @@ class ChantoruNotifier
     @l = Logger.new('log', 'daily')
     @to_email_address   = @id
     @from_email_address = 'noreply@inn0centzero.com'
+    write_current_pid
   end
 
   public
@@ -93,6 +94,11 @@ class ChantoruNotifier
         body.inject(""){|formated_body, title|
           formated_body += "・#{title}<br />"
         }
+    end
+  end
+  def write_current_pid
+    File.open('chantoru-notifier.pid', 'w') do |f|
+      f.write Process.pid
     end
   end
 end
