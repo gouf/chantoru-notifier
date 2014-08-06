@@ -64,10 +64,11 @@ class ChantoruNotifier
   def load_old_titles
     JSON.restore(File.open('recorded_list.json', 'r').read)
   end
-  def extract_new_titles n, o
+  def extract_new_titles new_titles, old_titles
     # Compare 2 arrays.
     # it will only get new titles
-    n.to_a - o.to_a
+
+    (new_titles | old_titles) - old_titles
   end
   def report_new_titles body
     # Setup AWS SES
