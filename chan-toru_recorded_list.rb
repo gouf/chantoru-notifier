@@ -90,7 +90,7 @@ class ChantoruNotifier
       body_html: body_html,
       body_text_charset: 'UTF-8'
     )
-    info('Message has sent.')
+    info('Message has been sent.')
   end
   def formated_body body, type
     case type
