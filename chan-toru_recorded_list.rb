@@ -11,11 +11,11 @@ class ChantoruNotifier
     @to_email_address   = @id
     @from_email_address = 'noreply@inn0centzero.com'
     write_current_pid
+    login
   end
 
   public
   def check_new_titles
-    login
     titles = get_latest_records(@a.get(recorded_list_url))
     unless titles.size == 0 then
       # Notify to user
