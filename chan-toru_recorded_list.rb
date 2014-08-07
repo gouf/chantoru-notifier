@@ -116,8 +116,8 @@ chantoru = ChantoruNotifier.new
 chantoru.info('Program has started')
 chantoru.check_new_titles
 EM.run do
-  # 1 hour cycle. (60sec. * 60)
-  EM.add_periodic_timer(60 * 60){
+  # 4 hour cycle. (60sec. * 60 * 4)
+  EM.add_periodic_timer(60 * 60 * 4){
     chantoru = ChantoruNotifier.new
     chantoru.check_new_titles
   }
