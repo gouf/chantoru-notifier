@@ -9,7 +9,7 @@ class ChantoruNotifier
     @a = Mechanize.new {|agent| agent.user_agent_alias = 'Mac Safari'}
     @l = Logger.new('log', 'daily')
     @to_email_address   = @id
-    @from_email_address = 'noreply@inn0centzero.com'
+    @from_email_address = ENV['CHANTORU_FROM']
     write_current_pid
     login
   end
