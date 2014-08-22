@@ -96,14 +96,14 @@ class ChantoruNotifier
   end
   def formated_body body, type
     case type
-      when :text
-        body.inject("") {|formated_body, title|
-          formated_body += "・#{title}\n"
-        }
-      when :html
-        body.inject(""){|formated_body, title|
-          formated_body += "・#{title}<br />"
-        }
+    when :text
+      body.inject('') {|formated_body, title|
+        formated_body += "・#{title}\n"
+      }
+    when :html
+      body.inject('') {|formated_body, title|
+        formated_body += "・#{title}<br />"
+      }
     end
   end
   def write_current_pid
