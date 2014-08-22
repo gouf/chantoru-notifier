@@ -18,11 +18,11 @@ class ChantoruNotifier
 
   def check_new_titles
     titles = get_latest_records(@a.get(recorded_list_url))
-    unless titles.size == 0 then
+    if titles.size == 0
+      info('Got no new titles')
+    else
       # Notify to user
       report_new_titles(titles)
-    else
-      info('Got no new titles')
     end
   end
   def info text
