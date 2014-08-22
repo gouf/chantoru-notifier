@@ -15,6 +15,7 @@ class ChantoruNotifier
   end
 
   public
+
   def check_new_titles
     titles = get_latest_records(@a.get(recorded_list_url))
     unless titles.size == 0 then
