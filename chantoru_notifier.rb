@@ -30,6 +30,7 @@ class ChantoruNotifier
   end
 
   private
+
   def login_url
     'https://auth.api.sonyentertainmentnetwork.com/2.0/oauth/authorize?response_type=code&client_id=bcff2bf0-d77e-493c-9bae-e34d2d47b8ca&redirect_uri=https://tv.so-net.ne.jp/chan-toru/sen/&scope=psn:s2s'
   end
