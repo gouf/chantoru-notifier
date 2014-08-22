@@ -6,7 +6,7 @@ class ChantoruNotifier
   def initialize
     @id   = ENV['CHANTORU_ID']
     @pass = ENV['CHANTORU_PASS']
-    @a = Mechanize.new {|agent| agent.user_agent_alias = 'Mac Safari'}
+    @a = Mechanize.new { |agent| agent.user_agent_alias = 'Mac Safari' }
     @l = Logger.new('log', 'daily')
     @to_email_address   = @id
     @from_email_address = ENV['CHANTORU_FROM']
