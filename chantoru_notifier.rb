@@ -25,7 +25,8 @@ class ChantoruNotifier
       report_new_titles(titles)
     end
   end
-  def info text
+
+  def info(text)
     @l.info(text)
   end
 
@@ -34,9 +35,11 @@ class ChantoruNotifier
   def login_url
     'https://auth.api.sonyentertainmentnetwork.com/2.0/oauth/authorize?response_type=code&client_id=bcff2bf0-d77e-493c-9bae-e34d2d47b8ca&redirect_uri=https://tv.so-net.ne.jp/chan-toru/sen/&scope=psn:s2s'
   end
+
   def recorded_list_url
     'https://tv.so-net.ne.jp/chan-toru/list?index=0&num=10&command=title'
   end
+
   def login
     @a.get(login_url) do |page|
       page.form_with(id: 'signInForm') do |f|
@@ -45,34 +48,40 @@ class ChantoruNotifier
       end.submit
     end
   end
-  def get_latest_records page
+
+  def get_latest_records(page)
     # Get latest titles.
     new_titles = load_new_titles(page)
     old_titles = load_old_titles
     save_to_file(new_titles)
     extract_new_titles(new_titles, old_titles)
   end
-  def load_new_titles page
+
+  def load_new_titles(page)
     return [] if JSON.restore(page.content.to_s)['list'].nil?
-    JSON.restore(page.content.to_s)['list'].collect do |d|
+    JSON.restore(page.content.to_s)['list'].map do |d|
       "#{d['title']}"
     end
   end
-  def save_to_file titles
+
+  def save_to_file(titles)
     File.open('recorded_list.json', 'w') do |f|
       f.write titles.to_json
     end
   end
+
   def load_old_titles
     JSON.restore(File.open('recorded_list.json', 'r').read)
   end
-  def extract_new_titles new_titles, old_titles
+
+  def extract_new_titles(new_titles, old_titles)
     # Compare 2 arrays.
     # it will only get new titles
 
     (new_titles | old_titles) - old_titles
   end
-  def report_new_titles body
+
+  def report_new_titles(body)
     # Setup AWS SES
     ses = AWS::SimpleEmailService.new(
       access_key_id:     ENV['AWS_ACCESS_KEY_ID'],
@@ -94,7 +103,8 @@ class ChantoruNotifier
     )
     info('Message has been sent.')
   end
-  def formated_body body, type
+
+  def formated_body(body, type)
     case type
     when :text
       body.inject('') {|formated_body, title|
@@ -106,6 +116,7 @@ class ChantoruNotifier
       }
     end
   end
+
   def write_current_pid
     File.open('chantoru-notifier.pid', 'w') do |f|
       f.write Process.pid
