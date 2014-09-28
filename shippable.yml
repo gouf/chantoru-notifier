@@ -24,7 +24,7 @@ before_script:
 
 script:
   - mkdir -p .elasticbeanstalk
-  - cp config .elasticbeanstalk/
+  - cp shippable_eb_config .elasticbeanstalk/config
 
 after_success :
   - $EB_TOOLS/AWSDevTools/Linux/AWSDevTools-RepositorySetup.sh
