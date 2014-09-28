@@ -15,7 +15,6 @@ GEM
     chronic (0.10.2)
     domain_name (0.5.20)
       unf (>= 0.0.5, < 1.0.0)
-    eventmachine (1.0.3)
     http-cookie (1.0.2)
       domain_name (~> 0.5)
     i18n (0.6.11)
@@ -54,7 +53,6 @@ PLATFORMS
 
 DEPENDENCIES
   aws-sdk
-  eventmachine
   json
   logger
   mechanize
