@@ -10,7 +10,9 @@ rvm:
 
 env:
   global:
-    - EB_TOOLS_DIR=/tmp/eb_tools EB_VERSION=AWS-ElasticBeanstalk-CLI-2.6.3 EB_TOOLS=$EB_TOOLS_DIR/$EB_VERSION
+    - EB_TOOLS_DIR=/tmp/eb_tools
+    - EB_VERSION=AWS-ElasticBeanstalk-CLI-2.6.3
+    - EB_TOOLS=$EB_TOOLS_DIR/$EB_VERSION
     - secure: Vy2Aw5JC8NRJ4B3sgljDecZkHNWZBWDde+4RfvEoHcaxPGLdO7Gx1HJAvbcafE7GQjCsLtG47yX8oW9PiPA56v8M+LePCA6b5V6Urwv5JF50lUQ72JR2Eegl44THqPF9wkr9odIGzm/o6Fvd0GrwtSAoV8zGySq5m/RfRK1fc7Tr1jNEYhorywRz59geS34JvHhspUXPYYSHLJJK3hNV/5cAi9et+H/9Uw7TBlaqTyINQMhX/G0nXmOG+lFjGR4ESSub2KEhu13lqGhjd1vnyu3urgpN7FhtZvo0X5TUZnRwc9STo31a0dCNvoddbjgbugo24x3jJQgVjppZ/TyEaQ==
     - secure: sKcMxniyJq7AK+E44n2XidZz2MgidSOBlk2OzlmxnwPADtNXJYxyw2rdLmudQiBhb7cyqmgpNCtxTXOzznLxp64HK6knK44tfNt+fA841irRE738+YgyfBMAUrjKvJF+bf8ZE/A+19zAb+3lj2DKqkdjoDW1rBbGuCzGzBLDUsZTwxvTSfQ7JHBuxOGGpqIHhjFihUBLqbN5pl/pb4B2PEHF1F+xfmmNVzdyB8ZNHH5JB7IWUrLL+l+qpExszokxuEgC8qRvs79Dz/zjchrDV5Z0uNt1P47Xu32n2nsxfSzpF4JvEsbTQ6s9X/ZXVv7G/E2quspx+AdbKscLWx8Qeg==
 
@@ -26,6 +28,6 @@ script:
   - mkdir -p .elasticbeanstalk
   - cp shippable_eb_config .elasticbeanstalk/config
 
-after_success :
-  - $EB_TOOLS/AWSDevTools/Linux/AWSDevTools-RepositorySetup.sh
+after_success:
+  - $EB_TOOLS_DIR/AWSDevTools/Linux/AWSDevTools-RepositorySetup.sh
   - export PATH=$PATH:$EB_TOOLS/eb/linux/python2.7/ && virtualenv ve && source ve/bin/activate && pip install boto==2.14.0 && eb push
