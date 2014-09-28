@@ -29,5 +29,5 @@ script:
   - cp shippable_eb_config .elasticbeanstalk/config
 
 after_success:
-  - $EB_TOOLS_DIR/AWSDevTools/Linux/AWSDevTools-RepositorySetup.sh
+  - $EB_TOOLS_DIR/$EB_VERSION/AWSDevTools/Linux/AWSDevTools-RepositorySetup.sh
   - export PATH=$PATH:$EB_TOOLS/eb/linux/python2.7/ && virtualenv ve && source ve/bin/activate && pip install boto==2.14.0 && eb push
