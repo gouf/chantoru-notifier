@@ -1,6 +1,7 @@
 source "https://rubygems.org"
 
-gem 'mechanize'
+gem 'nokogiri'
+gem 'watir'
 gem 'aws-sdk'
 gem 'json'
 gem 'logger'
